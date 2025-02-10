@@ -5,8 +5,15 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkMax;
-
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,8 +22,8 @@ import frc.robot.generated.Constants.ClimberConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase { 
-  private CANSparkMax m_climber;
-  private SparkPIDController c_pidController;
+  private SparkMax m_climber;
+  private SparkClosedLoopController c_pidController;
 
   private RelativeEncoder c_encoder;
 
@@ -24,26 +31,10 @@ public class ClimberSubsystem extends SubsystemBase {
 
   /** Creates a new ClimberSubsystem. */
   public ClimberSubsystem() {
-    m_climber = new CANSparkMax(ClimberConstants.climber, MotorType.kBrushless);
+  m_climber = new SparkMax(ClimberConstants.climber, MotorType.kBrushless);
 
-
-    m_climber.restoreFactoryDefaults();
-    m_climber.setIdleMode(IdleMode.kBrake);
-
-
-
-
-    /**
-       * In order to use PID functionality for a controller, a SparkPIDController object
-       * is constructed by calling the getPIDController() method on an existing
-       * CANSparkMax object
-       */
-    c_pidController = m_climber.getPIDController();
-  
-     // Encoder object created to display position values
-     c_encoder = m_climber.getEncoder();
-
-  
+SparkMaxConfig config = new SparkMaxConfig();
+     
      // PID coefficients
      kP = 0.03; 
      kI = 0;
@@ -53,15 +44,21 @@ public class ClimberSubsystem extends SubsystemBase {
      kMaxOutput = 1; 
      kMinOutput = -1;
      maxRPM = 5700;
-  
- // Setting PID coefficients
-     c_pidController.setP(kP);
-     c_pidController.setI(kI);
-     c_pidController.setD(kD);
-     c_pidController.setIZone(kIz);
-     c_pidController.setFF(kFF);
-     c_pidController.setOutputRange(kMinOutput, kMaxOutput);
 
+
+config
+    .inverted(false)
+    .idleMode(IdleMode.kBrake);
+config.encoder
+    .positionConversionFactor(1000)
+    .velocityConversionFactor(1000);
+config.closedLoop
+    .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+    .pidf(kP, kI, kD, kFF, ClosedLoopSlot.kSlot0);
+
+    m_climber.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+  
      
   
   }
@@ -80,7 +77,7 @@ public class ClimberSubsystem extends SubsystemBase {
   
   private void setPosition(double setPoint)
   {
-    c_pidController.setReference(setPoint, CANSparkMax.ControlType.kPosition);
+    c_pidController.setReference(setPoint, SparkMax.ControlType.kPosition);
 
   }
   
