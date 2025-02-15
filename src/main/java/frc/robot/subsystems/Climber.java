@@ -34,9 +34,9 @@ public class Climber extends SubsystemBase {
 
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
   private ShuffleboardTab tab = Shuffleboard.getTab("Climber");
-  private GenericEntry elevatorEncoder = tab.add("Climber Encoder", 0).getEntry();
-private GenericEntry elevatorVoltage =
-      tab.add("Elevator Voltage", 0)
+  private GenericEntry climberEncoder = tab.add("Climber Encoder", 0).getEntry();
+private GenericEntry climberVoltage =
+      tab.add("Climber Voltage", 0)
          .getEntry();
   /** Creates a new ElevatorSubsystem. */
 
@@ -147,14 +147,20 @@ public Command withPosition(double setPoint)
   return runOnce(() -> this.setPosition(setPoint));
 }
 
-public Command holdPosition()
+public Command climbPosition()
 {
-  return run(() -> this.setPosition(position));
+  return run(() -> this.setPosition(0));
 }
+
+public Command setupPosition()
+{
+  return run(() -> this.setPosition(0));
+}
+
 
 public Command setHomePosition()
 {
-  return run(() -> this.homePosition()/* .until(()-> this.CheckPositionHome())*/); // need to find
+  return run(() -> this.setPosition(0)/* .until(()-> this.CheckPositionHome())*/); // need to find
 }
 
 
@@ -176,7 +182,7 @@ public void periodic() {
 // elevatorEncoder.setDouble(l_encoder.getPosition());
 //SmartDashboard.putBoolean("limit checks", LimitChecks());
 //elevatorVoltage.setDouble(m_leftElevator.getAppliedOutput());
-SmartDashboard.putNumber("Elevator Encoder", climber.getPosition().getValueAsDouble());
+SmartDashboard.putNumber("Climber Encoder", climber.getPosition().getValueAsDouble());
 //SmartDashboard.putNumber("Elevator Appied Voltage", m_leftElevator.getAppliedOutput() );
 }
 }

@@ -50,6 +50,13 @@ public class PivotSubsystem extends SubsystemBase {
   private final VelocityTorqueCurrentFOC m_velocityTorque = new VelocityTorqueCurrentFOC(0).withSlot(1);
 
 
+  double homePosition = 0;
+  double L4Position = 0;
+  double L3Position = 0;
+  double L2Position = 0;
+
+
+
   public PivotSubsystem() {
 
     position = 0;
@@ -90,38 +97,34 @@ public void setHoldPosition(double holdposition) {
 public void setVelocity(double speed)
 {
   pivot.setControl(m_velocityTorque.withVelocity(speed));
+  position = pivot.getPosition().getValueAsDouble();
 }
 
 public boolean CheckPositionHome()
 {
- return MathUtil.isNear(0,pivot.getPosition().getValueAsDouble(), 1);
+ return MathUtil.isNear(homePosition,pivot.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL4()
 {
- return MathUtil.isNear(0,pivot.getPosition().getValueAsDouble(), 1);
-}
-
-public boolean CheckPositionL2()
-{
- return MathUtil.isNear(0,pivot.getPosition().getValueAsDouble(), 1);
+ return MathUtil.isNear(L4Position,pivot.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL3()
 {
- return MathUtil.isNear(0,pivot.getPosition().getValueAsDouble(), 1);
+ return MathUtil.isNear(L3Position,pivot.getPosition().getValueAsDouble(), 1);
+}
+
+public boolean CheckPositionL2()
+{
+ return MathUtil.isNear(L2Position,pivot.getPosition().getValueAsDouble(), 1);
 }
 
 private void setPosition(double setPoint)
 {
-  m_positionTorque.withPosition(setPoint);
+  position = setPoint;
 }
 
-public void homePosition()
-{
-   // l_pidController.setReference(ElevatorConstants.eHomePos, CANSparkMax.ControlType.kPosition);
-   // position = ElevatorConstants.eHomePos;
-}
 
 public double getEncoder()
 {
@@ -151,19 +154,30 @@ public Command withPosition(double setPoint)
   return runOnce(() -> this.setPosition(setPoint));
 }
 
-public Command holdPosition()
-{
-  return run(() -> this.setPosition(position));
-}
-
 public Command setHomePosition()
 {
-  return run(() -> this.homePosition()/* .until(()-> this.CheckPositionHome())*/); // need to find
+  return run(() -> this.setPosition(homePosition)); 
 }
+
+public Command setL4Position()
+{
+  return run(() -> this.setPosition(L4Position)); 
+}
+
+public Command setL3Position()
+{
+  return run(() -> this.setPosition(L3Position)); 
+}
+
+public Command setL2Position()
+{
+  return run(() -> this.setPosition(L2Position)); 
+}
+
 
 @Override
 public void periodic() {
-
+m_positionTorque.withPosition(position);
 //SmartDashboard.putBoolean("limit checks", LimitChecks());
 SmartDashboard.putNumber("Pivot Encoder", pivot.getPosition().getValueAsDouble());
 SmartDashboard.putNumber("Pivot Velocity", pivot.getVelocity().getValueAsDouble());

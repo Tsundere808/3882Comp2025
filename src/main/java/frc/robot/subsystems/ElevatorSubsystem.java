@@ -54,6 +54,13 @@ private GenericEntry elevatorVoltage =
   private final VelocityTorqueCurrentFOC m_velocityTorque = new VelocityTorqueCurrentFOC(0).withSlot(1);
 
 
+  double home = 0;
+  double L4 = 0;
+  double L3 = 0;
+  double L2 = 0;
+  double feedposition = 0;
+  double L1 = 0;
+
   public ElevatorSubsystem() {
 
     position = 0;
@@ -98,6 +105,7 @@ public void setHoldPosition(double holdposition) {
 public void setVelocity(double speed)
 {
   elevatorFollower.setControl(m_velocityTorque.withVelocity(speed));
+  position = elevatorFollower.getPosition().getValueAsDouble();
 }
 
 // public boolean CheckPositionAmp()
@@ -111,13 +119,7 @@ public void setVelocity(double speed)
 
 private void setPosition(double setPoint)
 {
-  m_positionTorque.withPosition(setPoint);
-}
-
-public void homePosition()
-{
-   // l_pidController.setReference(ElevatorConstants.eHomePos, CANSparkMax.ControlType.kPosition);
-   // position = ElevatorConstants.eHomePos;
+  position = setPoint;
 }
 
 public double getEncoder()
@@ -148,17 +150,35 @@ public Command withPosition(double setPoint)
   return runOnce(() -> this.setPosition(setPoint));
 }
 
-public Command holdPosition()
+public Command homePosition()
 {
-  return run(() -> this.setPosition(position));
+  return run(() -> this.setPosition(home));
 }
 
-public Command setHomePosition()
+public Command L4Position()
 {
-  return run(() -> this.homePosition()/* .until(()-> this.CheckPositionHome())*/); // need to find
+  return run(() -> this.setPosition(L4));
 }
 
+public Command L3Position()
+{
+  return run(() -> this.setPosition(L3));
+}
 
+public Command L2Position()
+{
+  return run(() -> this.setPosition(L2));
+}
+
+public Command L1Position()
+{
+  return run(() -> this.setPosition(L1));
+}
+
+public Command FeedPosition()
+{
+  return run(() -> this.setPosition(feedposition));
+}
 // public boolean LimitChecks()
 // {
 // return ((l_encoder.getPosition() > -1.5 && m_leftElevator.getAppliedOutput() > 0) || (l_encoder.getPosition() < ElevatorConstants.ELEVATORMAX && m_leftElevator.getAppliedOutput() < 0));
@@ -173,6 +193,8 @@ public void end() {
 @Override
 public void periodic() {
   // This method will be called once per scheduler run
+
+m_positionTorque.withPosition(position);
 
 // elevatorEncoder.setDouble(l_encoder.getPosition());
 //SmartDashboard.putBoolean("limit checks", LimitChecks());
