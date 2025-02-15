@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.Constants.ClimberConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ClimberSubsystem extends SubsystemBase { 
+public class ClimberSubsystemOLD extends SubsystemBase { 
   private SparkMax m_climber;
   private SparkClosedLoopController c_pidController;
 
@@ -30,7 +30,7 @@ public class ClimberSubsystem extends SubsystemBase {
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
 
   /** Creates a new ClimberSubsystem. */
-  public ClimberSubsystem() {
+  public ClimberSubsystemOLD() {
   m_climber = new SparkMax(ClimberConstants.climber, MotorType.kBrushless);
 
 SparkMaxConfig config = new SparkMaxConfig();
