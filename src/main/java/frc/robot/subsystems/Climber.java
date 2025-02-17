@@ -50,9 +50,10 @@ private GenericEntry climberVoltage =
   /* Keep a brake request so we can disable the motor */
   private final NeutralOut m_brake = new NeutralOut();
 
+  private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
 
-  //private final VelocityTorqueCurrentFOC m_velocityTorque = new VelocityTorqueCurrentFOC(0).withSlot(1);
-  private final VelocityVoltage m_velocityTorque = new VelocityVoltage(0).withSlot(1);
+  private final VelocityTorqueCurrentFOC m_velocityTorque = new VelocityTorqueCurrentFOC(0).withSlot(1);
+  //private final VelocityVoltage m_velocityTorque = new VelocityVoltage(0).withSlot(1);
 
 
   public Climber() {
@@ -61,10 +62,13 @@ private GenericEntry climberVoltage =
 
   
       TalonFXConfiguration configs = new TalonFXConfiguration();
-    configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
+    /* Voltage-based velocity requires a velocity feed forward to account for the back-emf of the motor */
+    configs.Slot0.kS = 0.1; // To account for friction, add 0.1 V of static feedforward
+    configs.Slot0.kV = 0.12; // Kraken X60 is a 500 kV motor, 500 rpm per V = 8.333 rps per V, 1/8.33 = 0.12 volts / rotation per second
+    configs.Slot0.kP = 0.11; // An error of 1 rotation per second results in 0.11 V output
     configs.Slot0.kI = 0; // No output for integrated error
-    configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
-    // Peak output of 8 V
+    configs.Slot0.kD = 0; // No output for error derivative
+    // Peak output of 8 volts
     configs.Voltage.withPeakForwardVoltage(Volts.of(8))
       .withPeakReverseVoltage(Volts.of(-8));
 
@@ -96,7 +100,7 @@ public void setHoldPosition(double holdposition) {
 
 public void setVelocity(double speed)
 {
-  climber.setControl(m_velocityTorque.withVelocity(speed));
+  climber.setControl(m_velocityVoltage.withVelocity(speed));
 }
 
 // public boolean CheckPositionAmp()
@@ -126,13 +130,13 @@ public double getEncoder()
 
 public Command slowUp()
 {
-  return run(() -> this.setVelocity(.1));
+  return run(() -> this.setVelocity(20));
 }
 
 
 public Command slowDown()
 {
-  return run(() -> this.setVelocity(-.1));
+  return run(() -> this.setVelocity(-20));
 }
 
 

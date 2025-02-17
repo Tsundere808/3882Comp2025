@@ -32,7 +32,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 
 public class CoralIntakeSubsystem extends SubsystemBase {
 
-  private final CANBus canbus = new CANBus("LUNACAN");
+  private final CANBus canbus = new CANBus();
   private final TalonFX m_intake = new TalonFX(50, canbus);
   private final TalonFX m_intakeFollower = new TalonFX(51, canbus);
   private final CANrange canrange = new CANrange(52,canbus);
@@ -86,12 +86,12 @@ private GenericEntry intakeVoltage =
 
   public void intake()
 {
-  m_intake.setControl(m_velocityVoltage.withVelocity(CoralIntakeConstants.intakeSpeed));
+  m_intake.setControl(m_velocityVoltage.withVelocity(10));
 }
 
   public void outtake()
 {
-    m_intake.setControl(m_velocityVoltage.withVelocity(CoralIntakeConstants.outtakeSpeed));
+    m_intake.setControl(m_velocityVoltage.withVelocity(-70));
 }
 
 public boolean coralCheck()
@@ -123,9 +123,6 @@ public Command stop()
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    intakeVoltage.setDouble(m_intake.getMotorVoltage().getValueAsDouble());
-    intakeSpeed.setDouble(m_intake.getRotorVelocity().getValueAsDouble());
-
     SmartDashboard.putNumber("canDistance ", canrange.getDistance().getValueAsDouble());
     SmartDashboard.putBoolean("Coral CHECK", canrange.getIsDetected().getValue());
 

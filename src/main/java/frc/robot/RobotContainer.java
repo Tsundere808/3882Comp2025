@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.Commands.IntakeCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.Constants.CoralIntakeConstants;
 import frc.robot.subsystems.Climber;
@@ -33,7 +33,11 @@ public class RobotContainer {
 
     private Climber climber = new Climber();
 
+
   //  private CoralIntakeSubsystem coralintake = new CoralIntakeSubsystem();
+
+    //private IntakeCommand intakeCommand = new IntakeCommand(coralintake);
+
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -66,15 +70,17 @@ public class RobotContainer {
         // joystick.pov(0).whileTrue(pivot.slowUp());
         // joystick.pov(180).whileTrue(pivot.slowDown());
 
-          //Elevator Code
-        climber.setDefaultCommand(climber.stop());
-        joystick.a().whileTrue(climber.slowDown());
-        joystick.y().whileTrue(climber.slowUp());
+          //Climber Code
+         climber.setDefaultCommand(climber.stop());
+         joystick.x().whileTrue(climber.slowDown());
+         joystick.b().whileTrue(climber.slowUp());
 
-        //Coral Controls
+        // //Coral Controls
         // coralintake.setDefaultCommand(coralintake.stop());
         // joystick.leftBumper().whileTrue(coralintake.intakeCommand());
         // joystick.leftTrigger().whileTrue(coralintake.outtakeCommand());
+
+        // joystick.rightBumper().onTrue(intakeCommand);
         
 
 
@@ -86,6 +92,9 @@ public class RobotContainer {
                     .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
+
+        joystick.pov(270).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
 
         // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         // joystick.b().whileTrue(drivetrain.applyRequest(() ->
