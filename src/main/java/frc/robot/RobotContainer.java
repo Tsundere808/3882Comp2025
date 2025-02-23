@@ -22,6 +22,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntakeSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
+import frc.robot.subsystems.PivotSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -29,7 +30,7 @@ public class RobotContainer {
 
   //  private ElevatorSubsystem elevator = new ElevatorSubsystem();
 
-  //  private PivotSubsystem pivot = new PivotSubsystem();
+   // private PivotSubsystem pivot = new PivotSubsystem();
 
     private Climber climber = new Climber();
 
@@ -66,14 +67,16 @@ public class RobotContainer {
         // joystick.y().whileTrue(elevator.slowUp());
         
         // //Pivot Controls
-        // pivot.setDefaultCommand(pivot.stop());
-        // joystick.pov(0).whileTrue(pivot.slowUp());
-        // joystick.pov(180).whileTrue(pivot.slowDown());
+        //  pivot.setDefaultCommand(pivot.stopCommand());
+        //  joystick.pov(0).whileTrue(pivot.slowUp());
+        //  joystick.pov(180).whileTrue(pivot.slowDown());
+  
 
-          //Climber Code
-         climber.setDefaultCommand(climber.stop());
-         joystick.x().whileTrue(climber.slowDown());
-         joystick.b().whileTrue(climber.slowUp());
+
+        //Climber Code
+        climber.setDefaultCommand(climber.stop());
+        joystick.x().whileTrue(climber.slowDown());
+        joystick.b().whileTrue(climber.slowUp());
 
         // //Coral Controls
         // coralintake.setDefaultCommand(coralintake.stop());

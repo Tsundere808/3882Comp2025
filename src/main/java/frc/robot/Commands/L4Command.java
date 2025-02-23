@@ -5,18 +5,22 @@
 package frc.robot.Commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ElevatorSubsystemOLD;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
+import frc.robot.subsystems.ShoulderSubsystem;
 
-public class ElevatorHomeCommand extends Command {
+public class L4Command extends Command {
   private final PivotSubsystem pivot;
- private final ElevatorSubsystemOLD elevator; 
+  private final ElevatorSubsystem elevator; 
+  private final ShoulderSubsystem shoulder;
+
   /** Creates a new AmpShot. */
-  public ElevatorHomeCommand(PivotSubsystem pivot,ElevatorSubsystemOLD elevator) {
+  public L4Command(PivotSubsystem pivot,ElevatorSubsystem elevator,ShoulderSubsystem shoulder) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.pivot = pivot;
     this.elevator = elevator;
-    addRequirements(pivot,elevator);
+    this.shoulder = shoulder;
+    addRequirements(pivot,elevator,shoulder);
   }
 
   // Called when the command is initially scheduled.
@@ -28,7 +32,7 @@ public class ElevatorHomeCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    return true;
+    return elevator.CheckPositionL4() && pivot.CheckPositionL4() && shoulder.CheckPositionL4();
   }
 
   // Called once the command ends or is interrupted.

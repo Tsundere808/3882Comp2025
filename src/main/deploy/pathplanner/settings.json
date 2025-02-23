@@ -4,7 +4,8 @@
   "holonomicMode": true,
   "pathFolders": [
     "Barge Paths",
-    "Middle Start"
+    "Middle Start",
+    "Opposite Barge"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,

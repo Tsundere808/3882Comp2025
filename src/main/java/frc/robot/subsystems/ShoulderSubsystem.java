@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -25,28 +24,30 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-public class ElevatorSubsystem extends SubsystemBase {
+public class ShoulderSubsystem extends SubsystemBase {
 
 
   private double position;
 
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
-  private ShuffleboardTab tab = Shuffleboard.getTab("Elevator");
-  private GenericEntry elevatorEncoder = tab.add("Elevator Encoder", 0).getEntry();
-  private GenericEntry elevatorVoltage =
-        tab.add("Elevator Voltage", 0)
+  private ShuffleboardTab tab = Shuffleboard.getTab("Shoulder");
+  private GenericEntry shoulderEncoder = tab.add("Shoulder Encoder", 0).getEntry();
+  private GenericEntry shoulderVoltage =
+        tab.add("Shoulder Voltage", 0)
           .getEntry();
-  /** Creates a new ElevatorSubsystem. */
+  /** Creates a new ShoulderSubsystem. */
 
 
-  private final TalonFX elevatorLead = new TalonFX(31); //LEFT is LEADER
-  private final TalonFX elevatorFollower = new TalonFX(32); //RIGHT is FOLLOWER  /* Be able to switch which control request to use based on a button press */
+  private final TalonFX shoulder = new TalonFX(33);
+  /* Be able to switch which control request to use based on a button press */
   /* Start at position 0, use slot 0 */
   private final PositionVoltage m_positionVoltage = new PositionVoltage(0).withSlot(0);
   /* Start at position 0, use slot 1 */
   private final PositionTorqueCurrentFOC m_positionTorque = new PositionTorqueCurrentFOC(0).withSlot(1);
   /* Keep a brake request so we can disable the motor */
   private final NeutralOut m_brake = new NeutralOut();
+
+
   private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
 
 
@@ -57,7 +58,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
 
-  public ElevatorSubsystem() {
+  public ShoulderSubsystem() {
 
     position = 0;
   
@@ -85,13 +86,9 @@ public class ElevatorSubsystem extends SubsystemBase {
      // Peak output of 8 volts
      configs.Voltage.withPeakForwardVoltage(Volts.of(8))
        .withPeakReverseVoltage(Volts.of(-8));
-   
-      elevatorLead.getConfigurator().apply(configs);
-      elevatorFollower.setControl(new Follower(elevatorLead.getDeviceID(), true));
-      elevatorLead.setNeutralMode(NeutralModeValue.Brake);
-      elevatorFollower.setNeutralMode(NeutralModeValue.Brake);
-      elevatorLead.setPosition(position);
-
+      shoulder.getConfigurator().apply(configs);
+      shoulder.setNeutralMode(NeutralModeValue.Brake);
+      shoulder.setPosition(position);
 
   }
 
@@ -101,38 +98,39 @@ public void setHoldPosition(double holdposition) {
 
 public void setVelocity(double speed)
 {
-  elevatorLead.setControl(m_velocityVoltage.withVelocity(speed));
+  shoulder.setControl(m_velocityVoltage.withVelocity(speed));
+  position = shoulder.getPosition().getValueAsDouble();
 }
 
 public boolean CheckPositionHome()
 {
- return MathUtil.isNear(homePosition,elevatorLead.getPosition().getValueAsDouble(), 1);
+ return MathUtil.isNear(homePosition,shoulder.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL4()
 {
- return MathUtil.isNear(L4Position,elevatorLead.getPosition().getValueAsDouble(), 1);
+ return MathUtil.isNear(L4Position,shoulder.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL3()
 {
- return MathUtil.isNear(L3Position,elevatorLead.getPosition().getValueAsDouble(), 1);
+ return MathUtil.isNear(L3Position,shoulder.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL2()
 {
- return MathUtil.isNear(L2Position,elevatorLead.getPosition().getValueAsDouble(), 1);
+ return MathUtil.isNear(L2Position,shoulder.getPosition().getValueAsDouble(), 1);
 }
 
 private void setPosition(double setPoint)
 {
-  elevatorLead.setControl(m_positionTorque.withPosition(setPoint));
+  shoulder.setControl(m_positionTorque.withPosition(setPoint));
 }
 
 
 public double getEncoder()
 {
-  return elevatorLead.getPosition().getValueAsDouble();
+  return shoulder.getPosition().getValueAsDouble();
 }
 
 public Command slowUp()
@@ -148,7 +146,7 @@ public Command slowDown()
 
 public void stop()
 {
-  elevatorLead.setControl(m_brake);
+  shoulder.setControl(m_brake);
 }
 
 
@@ -186,10 +184,10 @@ public Command setL2Position()
 
 @Override
 public void periodic() {
-//elevator.setControl(m_positionTorque.withPosition(position));
+//shoulder.setControl(m_positionTorque.withPosition(position));
 //SmartDashboard.putBoolean("limit checks", LimitChecks());
-SmartDashboard.putNumber("Elevator Encoder", elevatorLead.getPosition().getValueAsDouble());
-SmartDashboard.putNumber("Elevator Velocity", elevatorLead.getVelocity().getValueAsDouble());
+SmartDashboard.putNumber("Shoulder Encoder", shoulder.getPosition().getValueAsDouble());
+SmartDashboard.putNumber("Shoulder Velocity", shoulder.getVelocity().getValueAsDouble());
 
 }
 }

@@ -15,19 +15,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 //CTRE Imports Motor Imports
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
-import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class PivotSubsystem extends SubsystemBase {
 
@@ -43,17 +38,15 @@ public class PivotSubsystem extends SubsystemBase {
   /** Creates a new PivotSubsystem. */
 
 
-  private SparkMax pivot = new SparkMax(0, MotorType.kBrushless);
-  private SparkClosedLoopController c_pidController;  /* Be able to switch which control request to use based on a button press */
+  private final TalonFX pivot = new TalonFX(33);
+  /* Be able to switch which control request to use based on a button press */
   /* Start at position 0, use slot 0 */
   private final PositionVoltage m_positionVoltage = new PositionVoltage(0).withSlot(0);
   /* Start at position 0, use slot 1 */
   private final PositionTorqueCurrentFOC m_positionTorque = new PositionTorqueCurrentFOC(0).withSlot(1);
   /* Keep a brake request so we can disable the motor */
   private final NeutralOut m_brake = new NeutralOut();
-
-
-  private final VelocityTorqueCurrentFOC m_velocityTorque = new VelocityTorqueCurrentFOC(0).withSlot(1);
+  private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
 
 
   double homePosition = 0;
@@ -67,33 +60,33 @@ public class PivotSubsystem extends SubsystemBase {
 
     position = 0;
   
-    
-SparkMaxConfig config = new SparkMaxConfig();
-     
-     // PID coefficients
-     kP = 0.03; 
-     kI = 0;
-     kD = 0; 
-     kIz = 0; 
-     kFF = 0.000015; 
-     kMaxOutput = 1; 
-     kMinOutput = -1;
-     maxRPM = 5700;
+    TalonFXConfiguration configs = new TalonFXConfiguration();
+    configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
+    configs.Slot0.kI = 0; // No output for integrated error
+    configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
+    // Peak output of 8 V
+    configs.Voltage.withPeakForwardVoltage(Volts.of(8))
+      .withPeakReverseVoltage(Volts.of(-8));
 
+    configs.Slot1.kP = 60; // An error of 1 rotation results in 60 A output
+    configs.Slot1.kI = 0; // No output for integrated error
+    configs.Slot1.kD = 6; // A velocity of 1 rps results in 6 A output
+    // Peak output of 120 A
+    configs.TorqueCurrent.withPeakForwardTorqueCurrent(Amps.of(120))
+      .withPeakReverseTorqueCurrent(Amps.of(-120));
 
-config
-    .inverted(false)
-    .idleMode(IdleMode.kBrake);
-config.encoder
-    .positionConversionFactor(1000)
-    .velocityConversionFactor(1000);
-config.closedLoop
-    .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pidf(kP, kI, kD, kFF, ClosedLoopSlot.kSlot0);
-
-    pivot.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    pivot.getEncoder().setPosition(position);
+     /* Voltage-based velocity requires a velocity feed forward to account for the back-emf of the motor */
+     configs.Slot0.kS = 0.1; // To account for friction, add 0.1 V of static feedforward
+     configs.Slot0.kV = 0.12; // Kraken X60 is a 500 kV motor, 500 rpm per V = 8.333 rps per V, 1/8.33 = 0.12 volts / rotation per second
+     configs.Slot0.kP = 0.11; // An error of 1 rotation per second results in 0.11 V output
+     configs.Slot0.kI = 0; // No output for integrated error
+     configs.Slot0.kD = 0; // No output for error derivative
+     // Peak output of 8 volts
+     configs.Voltage.withPeakForwardVoltage(Volts.of(8))
+       .withPeakReverseVoltage(Volts.of(-8));
+      pivot.getConfigurator().apply(configs);
+      pivot.setNeutralMode(NeutralModeValue.Brake);
+      pivot.setPosition(position);
 
   }
 
@@ -103,62 +96,67 @@ public void setHoldPosition(double holdposition) {
 
 public void setVelocity(double speed)
 {
-  pivot.set(speed);
-  position = pivot.getEncoder().getPosition();
+  pivot.setControl(m_velocityVoltage.withVelocity(speed));
+  position = pivot.getPosition().getValueAsDouble();
 }
 
 public boolean CheckPositionHome()
 {
- return MathUtil.isNear(homePosition,pivot.getEncoder().getPosition(), 1);
+ return MathUtil.isNear(homePosition,pivot.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL4()
 {
- return MathUtil.isNear(L4Position,pivot.getEncoder().getPosition(), 1);
+ return MathUtil.isNear(L4Position,pivot.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL3()
 {
- return MathUtil.isNear(L3Position,pivot.getEncoder().getPosition(), 1);
+ return MathUtil.isNear(L3Position,pivot.getPosition().getValueAsDouble(), 1);
 }
 
 public boolean CheckPositionL2()
 {
- return MathUtil.isNear(L2Position,pivot.getEncoder().getPosition(), 1);
+ return MathUtil.isNear(L2Position,pivot.getPosition().getValueAsDouble(), 1);
 }
 
 private void setPosition(double setPoint)
 {
-  position = setPoint;
+  pivot.setControl(m_positionTorque.withPosition(setPoint));
 }
 
 
 public double getEncoder()
 {
-  return pivot.getEncoder().getPosition();
+  return pivot.getPosition().getValueAsDouble();
 }
 
 public Command slowUp()
 {
-  return run(() -> this.setVelocity(.1));
+  return run(() -> this.setVelocity(10));
 }
 
 
 public Command slowDown()
 {
-  return run(() -> this.setVelocity(-.1));
+  return run(() -> this.setVelocity(-10));
+}
+
+public void stop()
+{
+  pivot.setControl(m_brake);
 }
 
 
-public Command stop()
+public Command stopCommand()
 {
-  return run(() -> this.setVelocity(0));
+  return run(() -> this.stop());
 }
 
 
 public Command withPosition(double setPoint)
 {
-  return runOnce(() -> this.setPosition(setPoint));
+  return run(() -> this.setPosition(setPoint));
 }
 
 public Command setHomePosition()
@@ -184,9 +182,10 @@ public Command setL2Position()
 
 @Override
 public void periodic() {
-  c_pidController.setReference(position, SparkMax.ControlType.kPosition);
-  //SmartDashboard.putBoolean("limit checks", LimitChecks());
-SmartDashboard.putNumber("Pivot Encoder", pivot.getEncoder().getPosition());
+//pivot.setControl(m_positionTorque.withPosition(position));
+//SmartDashboard.putBoolean("limit checks", LimitChecks());
+SmartDashboard.putNumber("Pivot Encoder", pivot.getPosition().getValueAsDouble());
+SmartDashboard.putNumber("Pivot Velocity", pivot.getVelocity().getValueAsDouble());
 
 }
 }
