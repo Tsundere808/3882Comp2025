@@ -38,7 +38,7 @@ public class PivotSubsystem extends SubsystemBase {
   /** Creates a new PivotSubsystem. */
 
 
-  private final TalonFX pivot = new TalonFX(33);
+  private final TalonFX pivot = new TalonFX(21);
   /* Be able to switch which control request to use based on a button press */
   /* Start at position 0, use slot 0 */
   private final PositionVoltage m_positionVoltage = new PositionVoltage(0).withSlot(0);

@@ -48,7 +48,7 @@
   "folder": "Opposite Barge",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 53.51297944183717
   },
   "useDefaultConstraints": true
 }

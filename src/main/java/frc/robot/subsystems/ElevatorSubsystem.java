@@ -95,8 +95,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   }
 
-public void setHoldPosition(double holdposition) {
-  position = holdposition;
+public void setHoldPosition() {
+this.setPosition(this.getEncoder());
 }
 
 public void setVelocity(double speed)
@@ -155,6 +155,11 @@ public void stop()
 public Command stopCommand()
 {
   return run(() -> this.stop());
+}
+
+public Command holdCommand()
+{
+  return run(() -> this.setHoldPosition());
 }
 
 

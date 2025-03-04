@@ -5,14 +5,14 @@
 package frc.robot.Commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ElevatorSubsystemOLD;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
 
 public class ElevatorHomeCommand extends Command {
   private final PivotSubsystem pivot;
- private final ElevatorSubsystemOLD elevator; 
+ private final ElevatorSubsystem elevator; 
   /** Creates a new AmpShot. */
-  public ElevatorHomeCommand(PivotSubsystem pivot,ElevatorSubsystemOLD elevator) {
+  public ElevatorHomeCommand(PivotSubsystem pivot,ElevatorSubsystem elevator) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.pivot = pivot;
     this.elevator = elevator;

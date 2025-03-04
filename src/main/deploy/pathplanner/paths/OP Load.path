@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.71554054054054,
-        "y": 1.8707770270270263
+        "x": 3.3604261363636363,
+        "y": 1.0484801136363637
       },
       "isLocked": false,
       "linkedName": "OPBargeScore1"
@@ -20,8 +20,8 @@
         "y": 0.6652027027027032
       },
       "prevControl": {
-        "x": 2.8163006756756754,
-        "y": 1.3766891891891895
+        "x": 3.420255681818182,
+        "y": 0.9687073863636351
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 53.51297944183717
   },
   "reversed": false,
   "folder": "Opposite Barge",

@@ -22,18 +22,20 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntakeSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
+import frc.robot.subsystems.ShoulderSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
-  //  private ElevatorSubsystem elevator = new ElevatorSubsystem();
+  private ElevatorSubsystem elevator = new ElevatorSubsystem();
 
-   // private PivotSubsystem pivot = new PivotSubsystem();
+   private PivotSubsystem pivot = new PivotSubsystem();
 
-    private Climber climber = new Climber();
+  //  private Climber climber = new Climber();
 
+   // private ShoulderSubsystem shoulderSubsystem = new ShoulderSubsystem();
 
   //  private CoralIntakeSubsystem coralintake = new CoralIntakeSubsystem();
 
@@ -62,21 +64,33 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
    
         //Elevator Code
-        // elevator.setDefaultCommand(elevator.stop());
+        // elevator.setDefaultCommand(elevator.holdCommand());
         // joystick.a().whileTrue(elevator.slowDown());
         // joystick.y().whileTrue(elevator.slowUp());
+        // joystick.x().whileTrue(elevator.withPosition(0));
+        // joystick.b().whileTrue(elevator.withPosition(30)); //53
+
         
         // //Pivot Controls
-        //  pivot.setDefaultCommand(pivot.stopCommand());
-        //  joystick.pov(0).whileTrue(pivot.slowUp());
-        //  joystick.pov(180).whileTrue(pivot.slowDown());
+        pivot.setDefaultCommand(pivot.stopCommand());
+        joystick.pov(0).whileTrue(pivot.slowUp());
+        joystick.pov(180).whileTrue(pivot.slowDown());
+        joystick.pov(270).whileTrue(pivot.withPosition(0));
+        joystick.pov(90).whileTrue(pivot.withPosition(11));
   
-
+        //Shoulder
+        // shoulderSubsystem.setDefaultCommand(shoulderSubsystem.stopCommand());
+        // joystick.a().whileTrue(shoulderSubsystem.slowDown());
+        // joystick.y().whileTrue(shoulderSubsystem.slowUp());
+        // joystick.x().whileTrue(shoulderSubsystem.withPosition(0));
+        // joystick.b().whileTrue(shoulderSubsystem.withPosition(43));
 
         //Climber Code
-        climber.setDefaultCommand(climber.stop());
-        joystick.x().whileTrue(climber.slowDown());
-        joystick.b().whileTrue(climber.slowUp());
+        // climber.setDefaultCommand(climber.stop());
+        // joystick.x().whileTrue(climber.slowDown());
+        // joystick.b().whileTrue(climber.slowUp());
+        // joystick.a().whileTrue(climber.withPosition(0));
+        // joystick.y().whileTrue(climber.withPosition(-350));
 
         // //Coral Controls
         // coralintake.setDefaultCommand(coralintake.stop());
